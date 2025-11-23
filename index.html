@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Unlock the Message</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #0a0a0a;
+            color: #fff;
+            font-family: 'Courier New', monospace;
+            overflow-x: hidden;
+            min-height: 100vh;
+        }
+
+        .page {
+            display: none;
+            min-height: 100vh;
+            padding: 40px 20px;
+            animation: fadeIn 1s ease-in;
+        }
+
+        .page.active {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes glitch {
+            0% { transform: translate(0); }
+            20% { transform: translate(-2px, 2px); }
+            40% { transform: translate(-2px, -2px); }
+            60% { transform: translate(2px, 2px); }
+            80% { transform: translate(2px, -2px); }
+            100% { transform: translate(0); }
+        }
+
+        .glitch {
+            animation: glitch 0.3s infinite;
+        }
+
+        .container {
+            max-width: 700px;
+            width: 100%;
+            background: rgba(20, 20, 20, 0.9);
+            border: 1px solid #333;
+            padding: 50px 40px;
+            box-shadow: 0 0 30px rgba(255, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        h1 {
+            font-size: 2.5em;
+            margin-bottom: 30px;
+            color: #ff0000;
+            text-shadow: 0 0 10px rgba(255, 0, 0, 0.5);
+        }
+
+        p {
+            line-height: 1.8;
+            margin-bottom: 25px;
+            font-size: 1.1em;
+            color: #ccc;
+        }
+
+        .warning {
+            background: rgba(255, 0, 0, 0.1);
+            border-left: 3px solid #ff0000;
+            padding: 20px;
+            margin: 30px 0;
+            font-style: italic;
+            text-align: left;
+        }
+
+        .clue-box {
+            background: #1a1a1a;
+            border: 2px solid #ff0000;
+            padding: 30px;
+            margin: 30px 0;
+            font-size: 1.3em;
+            letter-spacing: 2px;
+            color: #ff6666;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 15px;
+            background: #1a1a1a;
+            border: 2px solid #444;
+            color: #fff;
+            font-family: 'Courier New', monospace;
+            font-size: 1.1em;
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #ff0000;
+            box-shadow: 0 0 15px rgba(255, 0, 0, 0.3);
+        }
+
+        button {
+            background: #ff0000;
+            color: #fff;
+            border: none;
+            padding: 18px 50px;
+            font-family: 'Courier New', monospace;
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            margin-top: 20px;
+        }
+
+        button:hover {
+            background: #cc0000;
+            box-shadow: 0 0 25px rgba(255, 0, 0, 0.6);
+            transform: scale(1.05);
+        }
+
+        .error {
+            color: #ff0000;
+            margin-top: 20px;
+            display: none;
+            font-weight: bold;
+            font-size: 1.1em;
+        }
+
+        .hint {
+            color: #666;
+            font-size: 0.9em;
+            margin-top: 15px;
+            font-style: italic;
+        }
+
+        .static {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: repeating-linear-gradient(
+                0deg,
+                rgba(0, 0, 0, 0.1),
+                rgba(0, 0, 0, 0.1) 1px,
+                transparent 1px,
+                transparent 2px
+            );
+            pointer-events: none;
+            opacity: 0.03;
+            z-index: 1000;
+        }
+
+        .video-container {
+            margin: 30px 0;
+            width: 100%;
+            aspect-ratio: 16/9;
+            background: #000;
+            border: 3px solid #ff0000;
+            box-shadow: 0 0 30px rgba(255, 0, 0, 0.3);
+        }
+
+        .video-container iframe {
+            width: 100%;
+            height: 100%;
+        }
+
+        #final h1 {
+            color: #ff69b4;
+            animation: none;
+        }
+
+        .success-message {
+            background: rgba(0, 255, 0, 0.1);
+            border: 2px solid #00ff00;
+            padding: 25px;
+            margin: 30px 0;
+            color: #00ff00;
+            font-size: 1.2em;
+        }
+
+        .lock-icon {
+            font-size: 3em;
+            margin-bottom: 20px;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 30px 20px;
+            }
+            
+            h1 {
+                font-size: 1.8em;
+            }
+            
+            .clue-box {
+                font-size: 1.1em;
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="static"></div>
+
+    <!-- PAGE 1: LOCKED PAGE -->
+    <div id="page1" class="page active">
+        <div class="container">
+            <div class="lock-icon">🔒</div>
+            <h1 class="glitch">ALIP TERKUNCI</h1>
+            
+            <p>Dia meninggalkan pesan untukmu, tapi tersegel di balik kunci.</p>
+            <p>Hanya kata sandi yang benar yang bisa membebaskannya.</p>
+
+            <div id="hintSection" style="display: none;">
+                <div class="warning">
+                    ⚠️ PETUNJUK: Cari video yang berjudul <strong>"I LOVE YOU"</strong><br>
+                    Di akhir video itu, kamu akan menemukan kata sandi yang kamu butuhkan.
+                </div>
+            </div>
+
+            <button id="hintButton" onclick="showHint()" style="
+                background: #333;
+                margin-bottom: 20px;
+                padding: 12px 30px;
+                font-size: 0.9em;
+            ">
+                💡 BUTUH PETUNJUK?
+            </button>
+
+            <div class="clue-box">
+                🔑 PETUNJUK: "I LOVE YOU"
+            </div>
+
+            <p style="font-size: 0.95em; color: #888;">Masukkan kalimat yang muncul di akhir video:</p>
+
+            <input 
+                type="text" 
+                id="passphrase" 
+                placeholder="Ketik kata sandi disini..."
+                autocomplete="off"
+            >
+
+            <button onclick="checkPassphrase()">BUKA PESAN ALIP</button>
+            
+            <p class="error" id="error">❌ KATA SANDI SALAH. TONTON VIDEONYA DENGAN TELITI.</p>
+            
+            <p class="hint">Petunjuk: Kalimat tentang bulan...</p>
+        </div>
+    </div>
+
+    <!-- PAGE 2: UNLOCKED - FINAL VIDEO -->
+    <div id="final" class="page">
+        <div class="container">
+            <div class="success-message">
+                <h1>🔓 TERBUKA!</h1>
+                <p>Kamu berhasil membebaskan Alip. Ini pesannya untukmu...</p>
+            </div>
+
+            <h2 style="color: #ff69b4; font-size: 2em; margin: 20px 0;">Selamat Ulang Tahun, Sayang! 🎂</h2>
+
+            <div style="margin: 30px 0;">
+                <a href="YOUR_VIDEO_LINK_HERE" target="_blank" style="
+                    display: inline-block;
+                    background: #ff0000;
+                    color: #fff;
+                    text-decoration: none;
+                    padding: 20px 40px;
+                    font-size: 1.3em;
+                    border: 2px solid #ff0000;
+                    box-shadow: 0 0 20px rgba(255, 0, 0, 0.4);
+                    transition: all 0.3s;
+                    letter-spacing: 2px;
+                ">
+                    ▶️ TONTON PESAN ALIP
+                </a>
+            </div>
+
+            <p style="margin-top: 30px; color: #ff69b4; font-size: 1.2em;">
+                ❤️ Dari Alip, dengan cinta ❤️
+            </p>
+        </div>
+    </div>
+
+    <script>
+        // PASSPHRASE YANG BENAR (harus persis sama dengan yang di video)
+        const correctPassphrase = "love you to the moon and back";
+
+        // Function to show hint
+        function showHint() {
+            const hintSection = document.getElementById('hintSection');
+            const hintButton = document.getElementById('hintButton');
+            if (hintSection && hintButton) {
+                hintSection.style.display = 'block';
+                hintButton.style.display = 'none';
+            }
+        }
+
+        function checkPassphrase() {
+            const input = document.getElementById('passphrase').value.trim().toLowerCase();
+            const normalized = input.replace(/[^\w\s]/g, ''); // Remove punctuation
+            const correctNormalized = correctPassphrase.replace(/[^\w\s]/g, '');
+
+            if (normalized === correctNormalized) {
+                // CORRECT! Unlock the video
+                document.getElementById('page1').classList.remove('active');
+                document.getElementById('final').classList.add('active');
+            } else {
+                // WRONG! Show error
+                const errorElement = document.getElementById('error');
+                errorElement.style.display = 'block';
+                
+                // Shake animation
+                const button = event.target;
+                button.style.animation = 'glitch 0.3s';
+                setTimeout(() => {
+                    button.style.animation = '';
+                    errorElement.style.display = 'none';
+                }, 2000);
+
+                // Clear input
+                document.getElementById('passphrase').value = '';
+            }
+        }
+
+        // Allow Enter key to submit
+        document.getElementById('passphrase').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') checkPassphrase();
+        });
+
+        // Auto-focus on input
+        window.addEventListener('load', () => {
+            document.getElementById('passphrase').focus();
+        });
+    </script>
+</body>
+</html>
